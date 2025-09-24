@@ -1,0 +1,532 @@
+{
+  "cards": {
+    "A_hearts": {
+      "value": "A",
+      "suit": "Hearts",
+      "name": "Ace of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/A.png",
+      "corner_template_path": "templates/hearts/A_corner.png"
+    },
+    "2_hearts": {
+      "value": "2",
+      "suit": "Hearts",
+      "name": "Two of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/2.png",
+      "corner_template_path": "templates/hearts/2_corner.png"
+    },
+    "3_hearts": {
+      "value": "3",
+      "suit": "Hearts",
+      "name": "Three of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/3.png",
+      "corner_template_path": "templates/hearts/3_corner.png"
+    },
+    "4_hearts": {
+      "value": "4",
+      "suit": "Hearts",
+      "name": "Four of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/4.png",
+      "corner_template_path": "templates/hearts/4_corner.png"
+    },
+    "5_hearts": {
+      "value": "5",
+      "suit": "Hearts",
+      "name": "Five of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/5.png",
+      "corner_template_path": "templates/hearts/5_corner.png"
+    },
+    "6_hearts": {
+      "value": "6",
+      "suit": "Hearts",
+      "name": "Six of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/6.png",
+      "corner_template_path": "templates/hearts/6_corner.png"
+    },
+    "7_hearts": {
+      "value": "7",
+      "suit": "Hearts",
+      "name": "Seven of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/7.png",
+      "corner_template_path": "templates/hearts/7_corner.png"
+    },
+    "8_hearts": {
+      "value": "8",
+      "suit": "Hearts",
+      "name": "Eight of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/8.png",
+      "corner_template_path": "templates/hearts/8_corner.png"
+    },
+    "9_hearts": {
+      "value": "9",
+      "suit": "Hearts",
+      "name": "Nine of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/9.png",
+      "corner_template_path": "templates/hearts/9_corner.png"
+    },
+    "10_hearts": {
+      "value": "10",
+      "suit": "Hearts",
+      "name": "Ten of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/10.png",
+      "corner_template_path": "templates/hearts/10_corner.png"
+    },
+    "J_hearts": {
+      "value": "J",
+      "suit": "Hearts",
+      "name": "Jack of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/J.png",
+      "corner_template_path": "templates/hearts/J_corner.png"
+    },
+    "Q_hearts": {
+      "value": "Q",
+      "suit": "Hearts",
+      "name": "Queen of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/Q.png",
+      "corner_template_path": "templates/hearts/Q_corner.png"
+    },
+    "K_hearts": {
+      "value": "K",
+      "suit": "Hearts",
+      "name": "King of Hearts",
+      "has_template": false,
+      "template_path": "templates/hearts/K.png",
+      "corner_template_path": "templates/hearts/K_corner.png"
+    },
+    "A_diamonds": {
+      "value": "A",
+      "suit": "Diamonds",
+      "name": "Ace of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/A.png",
+      "corner_template_path": "templates/diamonds/A_corner.png"
+    },
+    "2_diamonds": {
+      "value": "2",
+      "suit": "Diamonds",
+      "name": "Two of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/2.png",
+      "corner_template_path": "templates/diamonds/2_corner.png"
+    },
+    "3_diamonds": {
+      "value": "3",
+      "suit": "Diamonds",
+      "name": "Three of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/3.png",
+      "corner_template_path": "templates/diamonds/3_corner.png"
+    },
+    "4_diamonds": {
+      "value": "4",
+      "suit": "Diamonds",
+      "name": "Four of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/4.png",
+      "corner_template_path": "templates/diamonds/4_corner.png"
+    },
+    "5_diamonds": {
+      "value": "5",
+      "suit": "Diamonds",
+      "name": "Five of Diamonds",
+      "has_template": true,
+      "template_path": "templates/diamonds/5.png",
+      "corner_template_path": "templates/diamonds/5_corner.png"
+    },
+    "6_diamonds": {
+      "value": "6",
+      "suit": "Diamonds",
+      "name": "Six of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/6.png",
+      "corner_template_path": "templates/diamonds/6_corner.png"
+    },
+    "7_diamonds": {
+      "value": "7",
+      "suit": "Diamonds",
+      "name": "Seven of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/7.png",
+      "corner_template_path": "templates/diamonds/7_corner.png"
+    },
+    "8_diamonds": {
+      "value": "8",
+      "suit": "Diamonds",
+      "name": "Eight of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/8.png",
+      "corner_template_path": "templates/diamonds/8_corner.png"
+    },
+    "9_diamonds": {
+      "value": "9",
+      "suit": "Diamonds",
+      "name": "Nine of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/9.png",
+      "corner_template_path": "templates/diamonds/9_corner.png"
+    },
+    "10_diamonds": {
+      "value": "10",
+      "suit": "Diamonds",
+      "name": "Ten of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/10.png",
+      "corner_template_path": "templates/diamonds/10_corner.png"
+    },
+    "J_diamonds": {
+      "value": "J",
+      "suit": "Diamonds",
+      "name": "Jack of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/J.png",
+      "corner_template_path": "templates/diamonds/J_corner.png"
+    },
+    "Q_diamonds": {
+      "value": "Q",
+      "suit": "Diamonds",
+      "name": "Queen of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/Q.png",
+      "corner_template_path": "templates/diamonds/Q_corner.png"
+    },
+    "K_diamonds": {
+      "value": "K",
+      "suit": "Diamonds",
+      "name": "King of Diamonds",
+      "has_template": false,
+      "template_path": "templates/diamonds/K.png",
+      "corner_template_path": "templates/diamonds/K_corner.png"
+    },
+    "A_clubs": {
+      "value": "A",
+      "suit": "Clubs",
+      "name": "Ace of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/A.png",
+      "corner_template_path": "templates/clubs/A_corner.png"
+    },
+    "2_clubs": {
+      "value": "2",
+      "suit": "Clubs",
+      "name": "Two of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/2.png",
+      "corner_template_path": "templates/clubs/2_corner.png"
+    },
+    "3_clubs": {
+      "value": "3",
+      "suit": "Clubs",
+      "name": "Three of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/3.png",
+      "corner_template_path": "templates/clubs/3_corner.png"
+    },
+    "4_clubs": {
+      "value": "4",
+      "suit": "Clubs",
+      "name": "Four of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/4.png",
+      "corner_template_path": "templates/clubs/4_corner.png"
+    },
+    "5_clubs": {
+      "value": "5",
+      "suit": "Clubs",
+      "name": "Five of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/5.png",
+      "corner_template_path": "templates/clubs/5_corner.png"
+    },
+    "6_clubs": {
+      "value": "6",
+      "suit": "Clubs",
+      "name": "Six of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/6.png",
+      "corner_template_path": "templates/clubs/6_corner.png"
+    },
+    "7_clubs": {
+      "value": "7",
+      "suit": "Clubs",
+      "name": "Seven of Clubs",
+      "has_template": true,
+      "template_path": "templates/clubs/7.png",
+      "corner_template_path": "templates/clubs/7_corner.png"
+    },
+    "8_clubs": {
+      "value": "8",
+      "suit": "Clubs",
+      "name": "Eight of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/8.png",
+      "corner_template_path": "templates/clubs/8_corner.png"
+    },
+    "9_clubs": {
+      "value": "9",
+      "suit": "Clubs",
+      "name": "Nine of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/9.png",
+      "corner_template_path": "templates/clubs/9_corner.png"
+    },
+    "10_clubs": {
+      "value": "10",
+      "suit": "Clubs",
+      "name": "Ten of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/10.png",
+      "corner_template_path": "templates/clubs/10_corner.png"
+    },
+    "J_clubs": {
+      "value": "J",
+      "suit": "Clubs",
+      "name": "Jack of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/J.png",
+      "corner_template_path": "templates/clubs/J_corner.png"
+    },
+    "Q_clubs": {
+      "value": "Q",
+      "suit": "Clubs",
+      "name": "Queen of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/Q.png",
+      "corner_template_path": "templates/clubs/Q_corner.png"
+    },
+    "K_clubs": {
+      "value": "K",
+      "suit": "Clubs",
+      "name": "King of Clubs",
+      "has_template": false,
+      "template_path": "templates/clubs/K.png",
+      "corner_template_path": "templates/clubs/K_corner.png"
+    },
+    "A_spades": {
+      "value": "A",
+      "suit": "Spades",
+      "name": "Ace of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/A.png",
+      "corner_template_path": "templates/spades/A_corner.png"
+    },
+    "2_spades": {
+      "value": "2",
+      "suit": "Spades",
+      "name": "Two of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/2.png",
+      "corner_template_path": "templates/spades/2_corner.png"
+    },
+    "3_spades": {
+      "value": "3",
+      "suit": "Spades",
+      "name": "Three of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/3.png",
+      "corner_template_path": "templates/spades/3_corner.png"
+    },
+    "4_spades": {
+      "value": "4",
+      "suit": "Spades",
+      "name": "Four of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/4.png",
+      "corner_template_path": "templates/spades/4_corner.png"
+    },
+    "5_spades": {
+      "value": "5",
+      "suit": "Spades",
+      "name": "Five of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/5.png",
+      "corner_template_path": "templates/spades/5_corner.png"
+    },
+    "6_spades": {
+      "value": "6",
+      "suit": "Spades",
+      "name": "Six of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/6.png",
+      "corner_template_path": "templates/spades/6_corner.png"
+    },
+    "7_spades": {
+      "value": "7",
+      "suit": "Spades",
+      "name": "Seven of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/7.png",
+      "corner_template_path": "templates/spades/7_corner.png"
+    },
+    "8_spades": {
+      "value": "8",
+      "suit": "Spades",
+      "name": "Eight of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/8.png",
+      "corner_template_path": "templates/spades/8_corner.png"
+    },
+    "9_spades": {
+      "value": "9",
+      "suit": "Spades",
+      "name": "Nine of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/9.png",
+      "corner_template_path": "templates/spades/9_corner.png"
+    },
+    "10_spades": {
+      "value": "10",
+      "suit": "Spades",
+      "name": "Ten of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/10.png",
+      "corner_template_path": "templates/spades/10_corner.png"
+    },
+    "J_spades": {
+      "value": "J",
+      "suit": "Spades",
+      "name": "Jack of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/J.png",
+      "corner_template_path": "templates/spades/J_corner.png"
+    },
+    "Q_spades": {
+      "value": "Q",
+      "suit": "Spades",
+      "name": "Queen of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/Q.png",
+      "corner_template_path": "templates/spades/Q_corner.png"
+    },
+    "K_spades": {
+      "value": "K",
+      "suit": "Spades",
+      "name": "King of Spades",
+      "has_template": false,
+      "template_path": "templates/spades/K.png",
+      "corner_template_path": "templates/spades/K_corner.png"
+    }
+  },
+  "suits": {
+    "Hearts": {
+      "color": "red",
+      "symbol": "\u2665"
+    },
+    "Diamonds": {
+      "color": "red",
+      "symbol": "\u2666"
+    },
+    "Clubs": {
+      "color": "black",
+      "symbol": "\u2663"
+    },
+    "Spades": {
+      "color": "black",
+      "symbol": "\u2660"
+    }
+  },
+  "values": {
+    "A": {
+      "name": "Ace",
+      "blackjack_value": [
+        1,
+        11
+      ],
+      "numeric": 1
+    },
+    "2": {
+      "name": "Two",
+      "blackjack_value": [
+        2
+      ],
+      "numeric": 2
+    },
+    "3": {
+      "name": "Three",
+      "blackjack_value": [
+        3
+      ],
+      "numeric": 3
+    },
+    "4": {
+      "name": "Four",
+      "blackjack_value": [
+        4
+      ],
+      "numeric": 4
+    },
+    "5": {
+      "name": "Five",
+      "blackjack_value": [
+        5
+      ],
+      "numeric": 5
+    },
+    "6": {
+      "name": "Six",
+      "blackjack_value": [
+        6
+      ],
+      "numeric": 6
+    },
+    "7": {
+      "name": "Seven",
+      "blackjack_value": [
+        7
+      ],
+      "numeric": 7
+    },
+    "8": {
+      "name": "Eight",
+      "blackjack_value": [
+        8
+      ],
+      "numeric": 8
+    },
+    "9": {
+      "name": "Nine",
+      "blackjack_value": [
+        9
+      ],
+      "numeric": 9
+    },
+    "10": {
+      "name": "Ten",
+      "blackjack_value": [
+        10
+      ],
+      "numeric": 10
+    },
+    "J": {
+      "name": "Jack",
+      "blackjack_value": [
+        10
+      ],
+      "numeric": 11
+    },
+    "Q": {
+      "name": "Queen",
+      "blackjack_value": [
+        10
+      ],
+      "numeric": 12
+    },
+    "K": {
+      "name": "King",
+      "blackjack_value": [
+        10
+      ],
+      "numeric": 13
+    }
+  }
+}
