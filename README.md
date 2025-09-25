@@ -10,8 +10,8 @@ A modular, voice-controlled blackjack game designed for blind and visually impai
 - Complete blackjack game logic
 
 ## Quick Start
-1. Run: `python setup_modular_system.py`
-2. Run: `python modular_blackjack_system.py`
+1. Run: `install_script.py`
+2. Run: `accessible_blackjack.py`
 3. Say "train templates" to add card recognition templates
 4. Say "play blackjack" to start playing
 
