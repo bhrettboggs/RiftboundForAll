@@ -2,6 +2,11 @@
 
 A modular, voice-controlled blackjack game designed for blind and visually impaired users.
 
+#User Interface for Blackjack System
+- Start the Python program (it will open the camera and start TTS)
+- Open your browser and go to: http://localhost:5001
+- You'll see the modern UI with real-time connection to your Python backend
+
 ## Features
 - Voice-controlled interface
 - Computer vision card detection  
