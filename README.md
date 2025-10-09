@@ -47,3 +47,5 @@ A modular, voice-controlled blackjack game designed for blind and visually impai
 - Ensure bright, even lighting
 - Keep cards flat and separate
 - Position camera 12-18 inches above cards
+
+# RiftboundForAll
