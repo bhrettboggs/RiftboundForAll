@@ -300,7 +300,7 @@ class ImprovedAccessibleCardGame:
             suit_contours, _ = cv2.findContours(suit_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
             if suit_contours:
-                # Get the largest suit contour
+                # Get the largest suit contour 
                 largest_suit = max(suit_contours, key=cv2.contourArea)
                 
                 if cv2.contourArea(largest_suit) > 20:

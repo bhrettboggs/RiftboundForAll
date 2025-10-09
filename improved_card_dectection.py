@@ -453,7 +453,7 @@ class TemplateCollector:
             gray, thresh = self.detector.preprocess_image(frame)
             cards = self.detector.find_cards(thresh)
             
-            display = frame.copy()
+            display = frame.copy() 
             
             if len(cards) == 1:
                 # Draw the detected card
