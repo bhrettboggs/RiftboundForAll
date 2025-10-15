@@ -6,7 +6,6 @@ import threading
 import time
 import sys
 from typing import List, Tuple, Optional
-from improved_card_detection import ImprovedCardDetector
 
 class ImprovedAccessibleCardGame:
     def __init__(self):
@@ -45,8 +44,11 @@ class ImprovedAccessibleCardGame:
         self.current_game = None
         self.running = True
         
-        # Initialize improved card detector
-        self.card_detector = ImprovedCardDetector()
+        # Card detection parameters
+        self.min_card_area = 3000
+        self.max_card_area = 80000
+        self.card_aspect_ratio_min = 0.4
+        self.card_aspect_ratio_max = 1.0
         
         # Blackjack game state
         self.player_cards = []
@@ -300,7 +302,7 @@ class ImprovedAccessibleCardGame:
             suit_contours, _ = cv2.findContours(suit_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
             if suit_contours:
-                # Get the largest suit contour 
+                # Get the largest suit contour
                 largest_suit = max(suit_contours, key=cv2.contourArea)
                 
                 if cv2.contourArea(largest_suit) > 20:
@@ -332,27 +334,45 @@ class ImprovedAccessibleCardGame:
         return self.analyze_card_corner(corner_roi)
 
     def detect_and_identify_cards(self, frame):
-        """Main card detection and identification method using improved detector"""
-        # Use the improved card detector
-        detected_cards_raw = self.card_detector.detect_and_identify_cards(frame)
+        """Main card detection and identification method"""
+        # Preprocess frame
+        gray, thresh = self.preprocess_for_card_detection(frame)
         
-        # Convert to the format expected by the rest of the code
+        # Detect card contours
+        card_contours = self.detect_card_contours(thresh)
+        
         detected_cards = []
-        for card in detected_cards_raw:
-            # Only include cards with reasonable confidence
-            if card['rank_confidence'] > 0.5 and card['suit_confidence'] > 0.5:
+        annotated_frame = frame.copy()
+        
+        for i, card_info in enumerate(card_contours[:6]):  # Limit to 6 cards max
+            # Extract corner for recognition
+            corner = self.extract_corner_for_recognition(gray, card_info)
+            
+            if corner.size > 100:  # Only process if corner is large enough
+                # Identify card
+                value, suit = self.simple_card_recognition(corner)
+                
                 detected_cards.append({
-                    'value': card['rank'],
-                    'suit': card['suit'],
-                    'bbox': card['bbox'],
-                    'area': card['bbox'][2] * card['bbox'][3],  # width * height
-                    'confidence': min(card['rank_confidence'], card['suit_confidence'])
+                    'value': value,
+                    'suit': suit,
+                    'bbox': card_info['bbox'],
+                    'area': card_info['area']
                 })
+                
+                # Annotate frame
+                x, y, w, h = card_info['bbox']
+                cv2.rectangle(annotated_frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+                
+                # Add label
+                label = f"#{i+1}: {value} of {suit}"
+                cv2.putText(annotated_frame, label, (x, y - 10), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         
-        # Get annotated frame from the detector
-        annotated_frame = self.card_detector.annotate_frame(frame, detected_cards_raw)
+        # Add detection info to frame
+        info_text = f"Cards detected: {len(detected_cards)}"
+        cv2.putText(annotated_frame, info_text, (10, 30), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         
-        # Add game phase to frame
         phase_text = f"Phase: {self.game_phase}"
         cv2.putText(annotated_frame, phase_text, (10, 70), 
                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)

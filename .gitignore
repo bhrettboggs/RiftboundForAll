@@ -1,0 +1,31 @@
+# --- Virtual Environments (Crucial to Ignore) ---
+/venv/
+/env/
+/.venv/
+
+# --- Operating System Files ---
+.DS_Store
+
+# --- Compiled Python & Cache ---
+__pycache__/
+*.pyc
+
+# --- Large/Generated Data (Crucial to Ignore) ---
+/raw_cards/
+/card_data/
+/card_database/
+/card_templates/
+
+# --- Log and Output Files ---
+*.log
+*.txt
+!requirements.txt # The '!' excludes requirements.txt from being ignored
+
+# --- Machine Learning Model Files (Use Git LFS for these if needed) ---
+*.h5
+*.pb
+/saved_model/
+
+# --- IDE specific files ---
+.vscode/
+.idea/
