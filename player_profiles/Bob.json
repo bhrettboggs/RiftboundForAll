@@ -1,0 +1,23 @@
+{
+  "name": "Bob",
+  "profile_type": "Beginner",
+  "created_date": "2025-10-24T12:20:28.862520",
+  "last_played": null,
+  "statistics": {
+    "total_games": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "blackjacks": 0,
+    "busts": 0,
+    "longest_streak": 0,
+    "current_streak": 0,
+    "total_playtime_seconds": 0,
+    "game_history": []
+  },
+  "accessibility_settings": {
+    "speech_rate": 150,
+    "announcement_verbosity": "detailed",
+    "auto_announce_stats": true
+  }
+}

@@ -315,5 +315,6 @@ class AccessibleBlackjackSystem:
             self.cleanup()
 
 if __name__ == "__main__":
-    system = AccessibleBlackjackSystem()
+    from profile_integration import ProfileIntegratedBlackjackSystem
+    system = ProfileIntegratedBlackjackSystem()
     system.run()
