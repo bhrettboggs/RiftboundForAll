@@ -29,25 +29,30 @@ class CNNRecognitionModule:
         Predicts the card from an image.
         Returns: (card_name, confidence_score)
         """
-        print("--- EXECUTING THE CORRECT GRAYSCALE PREDICTION CODE ---")
-
+        # We removed the print statement to reduce console clutter
+        
         if self.model is None or card_image is None or card_image.size == 0:
             return "Unknown", 0.0
 
         try:
-            # Convert the incoming color image to grayscale to match the model's training data.
-            gray_image = cv2.cvtColor(card_image, cv2.COLOR_BGR2GRAY)
+            # --- START OF FIX ---
+            # The 'card_image' we receive is ALREADY the correct
+            # 2D (150, 150) grayscale image. We must not convert it.
+            # We just assign it to a new variable for clarity.
+            img_resized = card_image
+            # --- END OF FIX ---
             
-            # Resize the grayscale image to the model's expected input size.
-            img_resized = cv2.resize(gray_image, (self.img_width, self.img_height))
             
+            # --- START OF FIX ---
+            # We replace img_to_array() with a manual reshape to guarantee
+            # the (150, 150, 1) shape the model expects.
+            img_array = img_resized.reshape(self.img_width, self.img_height, 1)
+            # --- END OF FIX ---
             
-            # Convert the image to an array and reshape it for the model.
-            img_array = tf.keras.preprocessing.image.img_to_array(img_resized)
             img_array = np.expand_dims(img_array, axis=0)
             
             # Rescale pixel values just like in training.
-            img_array /= 255.0
+            img_array = img_array.astype('float32') / 255.0 # Also ensure it's float
 
             # Make the prediction.
             predictions = self.model.predict(img_array, verbose=0)

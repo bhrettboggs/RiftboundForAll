@@ -1,7 +1,9 @@
 import os
 import tensorflow as tf
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization
+# --- IMPORT THE NEW LAYER ---
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, GlobalAveragePooling2D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 
@@ -18,7 +20,6 @@ CLASS_INDICES_PATH = 'cnn_class_indices.txt'
 def build_model(num_classes):
     """Builds the Convolutional Neural Network model."""
     model = Sequential([
-        # --- THIS IS THE KEY CHANGE ---
         # The input shape now expects 1 channel (grayscale)
         Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 1)),
         BatchNormalization(),
@@ -32,14 +33,23 @@ def build_model(num_classes):
         BatchNormalization(),
         MaxPooling2D(pool_size=(2, 2)),
         
-        Flatten(),
+        # --- THE FINAL FIX ---
+        # Replace the volatile Flatten() layer
+        # with GlobalAveragePooling2D()
+        GlobalAveragePooling2D(),
+        # --- END OF FIX ---
+        
         Dense(512, activation='relu'),
+        BatchNormalization(),
         Dropout(0.5),
         Dense(num_classes, activation='softmax')
     ])
     
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
+    # Keep all our previous stability fixes
+    optimizer = Adam(learning_rate=0.0001, clipnorm=1.0) 
+    
+    model.compile(optimizer=optimizer,
+                  loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
                   metrics=['accuracy'])
     
     model.summary()
@@ -52,8 +62,7 @@ def train():
         print("Please run the 'data_augmentor.py' script first.")
         return
 
-    # --- THIS IS THE KEY CHANGE ---
-    # We now tell the data generators to load all images as grayscale
+    # We tell the data generators to load all images as grayscale
     train_datagen = ImageDataGenerator(rescale=1./255)
     validation_datagen = ImageDataGenerator(rescale=1./255)
 
@@ -62,7 +71,7 @@ def train():
         target_size=(IMG_WIDTH, IMG_HEIGHT),
         batch_size=BATCH_SIZE,
         class_mode='categorical',
-        color_mode='grayscale'  # <-- ADD THIS LINE
+        color_mode='grayscale'
     )
 
     validation_generator = validation_datagen.flow_from_directory(
@@ -70,7 +79,7 @@ def train():
         target_size=(IMG_WIDTH, IMG_HEIGHT),
         batch_size=BATCH_SIZE,
         class_mode='categorical',
-        color_mode='grayscale'  # <-- ADD THIS LINE
+        color_mode='grayscale'
     )
     
     num_classes = len(train_generator.class_indices)
