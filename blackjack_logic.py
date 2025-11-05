@@ -42,6 +42,15 @@ class BlackjackGame:
         
         # --- Game Phases ---
         self.game_phase: str = "WAITING_FOR_CLEAR"
+
+    def speak_and_wait(self, text: str, wait_time: float = 1.0):
+        """
+        Speak text and wait for it to finish before continuing.
+        Useful for important messages.
+        """
+        self.tts.speak(text)
+        self.tts.wait_for_speech(timeout=5.0)
+        time.sleep(wait_time)  # Extra pause for comprehension
         
     def reset_game(self) -> str:
         """Resets the game to its initial state."""
@@ -93,13 +102,16 @@ class BlackjackGame:
         or a VOICE command occurs.
         """
         message_to_speak = None
+
+        if command:
+            command = command.lower().strip()
         
         # --- NEW: Global Commands (The Escape Hatch) ---
         if command:
-            if command in ["new game", "play again"]: # <-- MODIFIED
+            if command in ["new game", "play again", "restart", "deal again", "again"]: # <-- MODIFIED
                 message_to_speak = self.reset_game()
                 return message_to_speak 
-            elif command == "i quit": # <-- MODIFIED
+            elif command in ["i quit", "quit", "exit", "stop"]: # <-- MODIFIED
                 self.running = False
                 return None 
         # --- END NEW ---
@@ -124,7 +136,7 @@ class BlackjackGame:
                 dealer_card_str = self.dealer_hand[0]
                 message_to_speak = (f"Cards dealt. You have {player_total_str}. "
                                     f"Dealer shows {dealer_card_str}. "
-                                    "Say 'i hit' or 'stand'.") # <-- MODIFIED
+                                    "Say 'hit' or 'stand'.") # <-- MODIFIED
                 self.last_dealer_total = self.dealer_total
                 self.last_player_total = self.player_total  # <-- ADDED THIS
         
@@ -132,16 +144,13 @@ class BlackjackGame:
         elif self.game_phase == "PLAYER_TURN":
             # 1. Check for Bust (Vision)
             if self.player_total > 21:
-                # 1. Check for Bust (Vision)
-                # --- MODIFIED BLOCK ---
-                # We speak the bust message immediately
+            # Speak bust message once and wait
                 bust_message = f"You busted with {self.player_total}. You lose."
-                self.tts.speak(bust_message)
-                time.sleep(1) # Give a pause
+                self.speak_and_wait(bust_message, 2.0)
                 
-                # Now we set the *next* message to the "Game Over" prompt
-                message_to_speak = "Game over. Say 'new game' to play again, or 'i quit' to exit."
-                # --- END MODIFIED BLOCK ---
+                # Now set the game over prompt
+                message_to_speak = "Say 'new game' to play again, or 'i quit' to exit."
+                            # --- END MODIFIED BLOCK ---
                 
                 self.game_phase = "GAME_OVER"
                 self.last_player_total = self.player_total # Lock in the total
@@ -157,17 +166,17 @@ class BlackjackGame:
             # This is the fix. It runs if no voice command was given
             # AND the player's total has changed since we last spoke.
             elif not command and self.player_total != self.last_player_total:
-                message_to_speak = f"Your total is now {self.player_total}. Say 'i hit' or 'stand'."
+                message_to_speak = f"Your total is now {self.player_total}. Say 'hit' or 'stand'."
                 self.last_player_total = self.player_total # Update the last total
 
             # 4. Check for Voice Commands
             elif command:
-                if command == "i hit": # <-- MODIFIED
+                if command in ["i hit", "hit", "hit me", "deal me", "card"]:# <-- MODIFIED
                     message_to_speak = "Hit. Please add your new card."
                     # We update last_player_total so the *next*
                     # vision update will trigger the block above.
                     self.last_player_total = self.player_total 
-                elif command == "stand":
+                elif command in ["stand", "stay", "i stand", "i'm good", "hold"]:
                     message_to_speak = (f"You stand with {self.player_total}. "
                                         "Dealer's turn. Please reveal the dealer's hole card. "
                                         "Keep adding cards until the dealer's total is 17 or more.")
