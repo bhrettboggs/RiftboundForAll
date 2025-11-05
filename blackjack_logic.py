@@ -42,6 +42,9 @@ class BlackjackGame:
         
         # --- Game Phases ---
         self.game_phase: str = "WAITING_FOR_CLEAR"
+        
+        # --- NEW: Flag to prevent duplicate game-end announcements ---
+        self.game_end_announced: bool = False
 
     def speak_and_wait(self, text: str, wait_time: float = 1.0):
         """
@@ -66,7 +69,8 @@ class BlackjackGame:
         self.last_seen_dealer_hand = ()
         self.current_stability_count = 0
         
-        self.game_phase = "WAITING_FOR_CLEAR" 
+        self.game_phase = "WAITING_FOR_CLEAR"
+        self.game_end_announced = False  # Reset the flag
         
         return "New game. Please clear all cards from the table."
 
@@ -182,28 +186,36 @@ class BlackjackGame:
                                         "Keep adding cards until the dealer's total is 17 or more.")
                     self.game_phase = "DEALER_TURN"
                     self.last_player_total = self.player_total # Lock in the total
+                    self.game_end_announced = False  # Reset for new dealer turn
         
-        # --- STATE: DEALER_TURN (Vision-based) ---
+        # --- STATE: DEALER_TURN (Vision-based with AUTOMATIC GAME END) ---
         elif self.game_phase == "DEALER_TURN":
-            if self.dealer_total != self.last_dealer_total:
+            # Announce when dealer's total changes (only before reaching 17)
+            if self.dealer_total != self.last_dealer_total and self.dealer_total < 17:
                 message_to_speak = f"Dealer total is now {self.dealer_total}."
                 self.last_dealer_total = self.dealer_total
             
-            if self.dealer_total >= 17:
+            # AUTOMATIC GAME END: When dealer reaches 17 or more
+            if self.dealer_total >= 17 and not self.game_end_announced:
+                # Mark that we're announcing the end (prevents duplicates)
+                self.game_end_announced = True
+                
+                # Announce dealer's final total
                 if self.dealer_total > 21:
                     dealer_end_message = f"Dealer busts with {self.dealer_total}."
                 else:
                     dealer_end_message = f"Dealer stands with {self.dealer_total}."
                 
-                self.tts.speak(dealer_end_message)
-                time.sleep(1) 
+                self.speak_and_wait(dealer_end_message, 1.5)
                 
+                # Automatically determine and announce winner
                 result_message = self.determine_winner(self.player_total, self.dealer_total)
-                self.tts.speak(result_message)
-                time.sleep(1)
+                self.speak_and_wait(result_message, 2.0)
                 
-                message_to_speak = "Game over. Say 'new game' to play again, or 'i quit' to exit." # <-- MODIFIED
+                # Prompt for next action
+                message_to_speak = "Game over. Say 'new game' to play again, or 'i quit' to exit."
                 self.game_phase = "GAME_OVER"
+                self.last_dealer_total = self.dealer_total  # Lock in final total
         
         # --- STATE: GAME_OVER ---
         elif self.game_phase == "GAME_OVER":
