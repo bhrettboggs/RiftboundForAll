@@ -1,0 +1,15 @@
+
+=== NEW HAND ===
+Dealer shows: Four of Clubs
+You has: Five of Hearts, Nine of Spades. Total: 14
+
+Waiting for your decision (hit/stand)...
+
+You chose: hit
+
+Waiting for next card...
+
+You drew: Ten of Clubs
+You has: Five of Hearts, Nine of Spades, Ten of Clubs. Total: 24
+
+BUST! You have 24. You lose.
