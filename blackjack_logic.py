@@ -1,147 +1,288 @@
-from typing import List, Dict, Tuple, Optional
-from card_database import CardDatabase # Assuming CardDatabase has correct value lookup
+import cv2
+import time
+import random
+from typing import List, Dict, Optional, Tuple
 
-# Type alias for clarity
-CardTuple = Tuple[str, str] # (Value, Suit)
-DetectedCardInfo = Dict # Dict of card data from CardDetector
+# Import the other team members' modules
+from card_detection import CardDetector  # Ash's Module
+import tts_module                             # Bhrett's NEW Module
 
-class BlackjackGameStateManager:
+class BlackjackGame:
     """
-    Manages the mapping of recognized cards to the game state (player/dealer hands).
-    Also handles core blackjack calculations.
+    This is Evan's module.
+    It acts as the central hub, connecting detection (Ash) and 
+    audio (Bhrett) to manage the full game.
     """
     
-    def __init__(self, card_database: CardDatabase):
-        self.db = card_database
-        self.reset_game()
+    def __init__(self):
+        print("[GameState] Initializing systems...")
+        self.detector = CardDetector()
+        self.tts = tts_module.AudioManager()  # Use the real audio module
+        self.running = True
         
-    def reset_game(self):
-        """Reset all game state variables."""
-        self.player_cards: List[CardTuple] = []
-        self.dealer_cards: List[CardTuple] = []
-        self.game_phase: str = "waiting" # waiting, dealing, player_turn, dealer_turn, game_over
-        self.game_result: Optional[str] = None
+        self.card_values = {
+            'A': 11, 'K': 10, 'Q': 10, 'J': 10, '10': 10, 
+            '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2
+        }
         
-        # Tracking the physical cards (simplified based on the number seen)
-        self.cards_in_play_count: int = 0
+        # --- Stability and State Tracking ---
+        self.player_hand: List[str] = []
+        self.dealer_hand: List[str] = []
+        self.player_total: int = 0
+        self.dealer_total: int = 0
+        self.last_dealer_total: int = 0
+        self.last_player_total: int = 0  # <-- ADDED THIS
+        
+        self.last_seen_player_hand: Tuple[str, ...] = ()
+        self.last_seen_dealer_hand: Tuple[str, ...] = ()
+        self.current_stability_count: int = 0
+        
+        # --- UPDATED: More Stability ---
+        self.REQUIRED_STABILITY: int = 30 
+        
+        # --- Game Phases ---
+        self.game_phase: str = "WAITING_FOR_CLEAR"
+        
+    def reset_game(self) -> str:
+        """Resets the game to its initial state."""
+        print("[GameState] Resetting game...")
+        self.player_hand = []
+        self.dealer_hand = []
+        self.player_total = 0
+        self.dealer_total = 0
+        self.last_dealer_total = 0
+        self.last_player_total = 0  # <-- ADDED THIS
+        
+        self.last_seen_player_hand = ()
+        self.last_seen_dealer_hand = ()
+        self.current_stability_count = 0
+        
+        self.game_phase = "WAITING_FOR_CLEAR" 
+        
+        return "New game. Please clear all cards from the table."
 
-    # --- Core Blackjack Logic ---
-
-    def calculate_hand_value(self, cards: List[CardTuple]) -> int:
-        """Calculate blackjack value of a hand, handling Aces."""
+    def calculate_hand_value(self, hand: List[str]) -> int:
+        """Calculates the total value of a hand of cards."""
         total = 0
         aces = 0
-        
-        for value, _ in cards:
-            blackjack_values = self.db.get_blackjack_value(value)
-            
-            if not blackjack_values:
-                # Handle unrecognized card value (e.g., set to 0 or 1)
-                continue
-
-            if len(blackjack_values) > 1:  # Ace (1/11)
-                aces += 1
-                total += 11
-            else:
-                total += blackjack_values[0]
-        
-        # Handle Aces (convert 11 to 1 if needed to avoid bust)
+        for card_id in hand:
+            value_str = card_id[:-1] 
+            value = self.card_values.get(value_str, 0)
+            if value == 11: aces += 1
+            total += value
         while total > 21 and aces > 0:
             total -= 10
             aces -= 1
-        
         return total
 
-    def is_blackjack(self, cards: List[CardTuple]) -> bool:
-        """Check if hand is blackjack (21 with exactly 2 cards)."""
-        return len(cards) == 2 and self.calculate_hand_value(cards) == 21
-    
-    def is_bust(self, cards: List[CardTuple]) -> bool:
-        """Check if hand is bust (over 21)."""
-        return self.calculate_hand_value(cards) > 21
-
-    # --- Card Assignment Logic (Crucial for CV integration) ---
-
-    def assign_initial_cards(self, identified_cards: List[CardTuple]):
-        """
-        Assigns the first 3 or 4 identified cards to player and dealer hands.
-        Assumes first 2 cards are player's, next 1 is dealer's upcard.
-        """
-        if len(identified_cards) < 3:
-            return False, "Not enough cards detected for initial deal (need at least 3)."
-        
-        self.player_cards = identified_cards[:2]
-        self.dealer_cards = identified_cards[2:3] # Dealer shows 1 card
-        self.cards_in_play_count = len(self.player_cards) + len(self.dealer_cards)
-        self.game_phase = "player_turn"
-        
-        return True, "Initial deal successful."
-
-    def assign_new_card(self, stable_cards_detected: List[DetectedCardInfo], identified_cards: List[CardTuple]) -> Optional[CardTuple]:
-        """
-        Assigns the next card during a 'Hit' by comparing the newly identified card count
-        with the current cards in play count.
-        
-        Returns: The new CardTuple if successful, otherwise None.
-        """
-        new_card_count = len(identified_cards)
-        
-        if new_card_count <= self.cards_in_play_count:
-            return None, f"Expected {self.cards_in_play_count + 1} cards, only saw {new_card_count}."
-        
-        # The new card is the last identified card in the list
-        new_card = identified_cards[-1]
-        
-        # Add to player hand
-        self.player_cards.append(new_card)
-        self.cards_in_play_count += 1
-        
-        return new_card, "Player successfully hit."
-
-    def assign_dealer_hit(self, new_card: CardTuple):
-        """Adds a card to the dealer's hand and updates the count."""
-        self.dealer_cards.append(new_card)
-        self.cards_in_play_count += 1
-
-    def determine_winner(self) -> str:
-        """Determine game winner based on final hands."""
-        player_total = self.calculate_hand_value(self.player_cards)
-        dealer_total = self.calculate_hand_value(self.dealer_cards)
-        
-        if self.is_bust(self.player_cards):
-            return "dealer_wins_player_bust"
-        
-        if self.is_bust(self.dealer_cards):
-            return "player_wins_dealer_bust"
-        
-        if self.is_blackjack(self.player_cards) and self.is_blackjack(self.dealer_cards):
-            return "push_both_blackjack"
-        elif self.is_blackjack(self.player_cards):
-            return "player_blackjack"
-        elif self.is_blackjack(self.dealer_cards):
-            return "dealer_blackjack"
-        
+    def determine_winner(self, player_total: int, dealer_total: int) -> str:
+        """Compares final totals and returns a result message."""
+        if player_total > 21:
+            return f"You busted with {player_total}. You lose."
+        if dealer_total > 21:
+            return f"Dealer busted with {dealer_total}. You win!"
         if player_total > dealer_total:
-            return "player_wins_higher"
-        elif dealer_total > player_total:
-            return "dealer_wins_higher"
-        else:
-            return "push"
+            return f"You win with {player_total} to {dealer_total}!"
+        if dealer_total > player_total:
+            return f"Dealer wins with {dealer_total} to {player_total}."
+        return f"It's a push. You both have {player_total}."
+
+    def update_game_state(self, command: Optional[str]):
+        """
+        This logic function is now only called when a STABLE vision change
+        or a VOICE command occurs.
+        """
+        message_to_speak = None
         
-    def get_hand_description(self, cards: List[CardTuple], show_total: bool = True) -> str:
-        """Get spoken description of a hand."""
-        if not cards:
-            return "no cards"
+        # --- NEW: Global Commands (The Escape Hatch) ---
+        if command:
+            if command in ["new game", "play again"]: # <-- MODIFIED
+                message_to_speak = self.reset_game()
+                return message_to_speak 
+            elif command == "i quit": # <-- MODIFIED
+                self.running = False
+                return None 
+        # --- END NEW ---
+
+        # 1. Recalculate totals based on the STABLE hands
+        self.player_total = self.calculate_hand_value(self.player_hand)
+        self.dealer_total = self.calculate_hand_value(self.dealer_hand)
+
+        # 2. Run the State Machine
         
-        descriptions = []
-        for value, suit in cards:
-            card_info = self.db.get_card_info(value, suit)
-            descriptions.append(card_info['name'] if card_info else f"{value} of {suit}")
+        # --- STATE: WAITING_FOR_CLEAR ---
+        if self.game_phase == "WAITING_FOR_CLEAR":
+            if len(self.player_hand) == 0 and len(self.dealer_hand) == 0:
+                self.game_phase = "STARTING"
+                message_to_speak = "Table is clear. Please place 2 cards for yourself and 1 for the dealer."
+
+        # --- STATE: STARTING ---
+        elif self.game_phase == "STARTING":
+            if len(self.player_hand) == 2 and len(self.dealer_hand) == 1:
+                self.game_phase = "PLAYER_TURN"
+                player_total_str = str(self.player_total)
+                dealer_card_str = self.dealer_hand[0]
+                message_to_speak = (f"Cards dealt. You have {player_total_str}. "
+                                    f"Dealer shows {dealer_card_str}. "
+                                    "Say 'i hit' or 'stand'.") # <-- MODIFIED
+                self.last_dealer_total = self.dealer_total
+                self.last_player_total = self.player_total  # <-- ADDED THIS
         
-        description = f"{', '.join(descriptions[:-1])} and {descriptions[-1]}" if len(descriptions) > 1 else descriptions[0]
+        # --- STATE: PLAYER_TURN (REPLACED BLOCK) ---
+        elif self.game_phase == "PLAYER_TURN":
+            # 1. Check for Bust (Vision)
+            if self.player_total > 21:
+                # 1. Check for Bust (Vision)
+                # --- MODIFIED BLOCK ---
+                # We speak the bust message immediately
+                bust_message = f"You busted with {self.player_total}. You lose."
+                self.tts.speak(bust_message)
+                time.sleep(1) # Give a pause
+                
+                # Now we set the *next* message to the "Game Over" prompt
+                message_to_speak = "Game over. Say 'new game' to play again, or 'i quit' to exit."
+                # --- END MODIFIED BLOCK ---
+                
+                self.game_phase = "GAME_OVER"
+                self.last_player_total = self.player_total # Lock in the total
+                
+            
+            # 2. Check for 21 (Vision)
+            elif self.player_total == 21:
+                message_to_speak = "You have 21. Standing automatically."
+                self.game_phase = "DEALER_TURN"
+                self.last_player_total = self.player_total # Lock in the total
+
+            # 3. NEW: Check for Vision Change (if no command)
+            # This is the fix. It runs if no voice command was given
+            # AND the player's total has changed since we last spoke.
+            elif not command and self.player_total != self.last_player_total:
+                message_to_speak = f"Your total is now {self.player_total}. Say 'i hit' or 'stand'."
+                self.last_player_total = self.player_total # Update the last total
+
+            # 4. Check for Voice Commands
+            elif command:
+                if command == "i hit": # <-- MODIFIED
+                    message_to_speak = "Hit. Please add your new card."
+                    # We update last_player_total so the *next*
+                    # vision update will trigger the block above.
+                    self.last_player_total = self.player_total 
+                elif command == "stand":
+                    message_to_speak = (f"You stand with {self.player_total}. "
+                                        "Dealer's turn. Please reveal the dealer's hole card. "
+                                        "Keep adding cards until the dealer's total is 17 or more.")
+                    self.game_phase = "DEALER_TURN"
+                    self.last_player_total = self.player_total # Lock in the total
         
-        if show_total:
-            total = self.calculate_hand_value(cards)
-            description += f", total {total}"
+        # --- STATE: DEALER_TURN (Vision-based) ---
+        elif self.game_phase == "DEALER_TURN":
+            if self.dealer_total != self.last_dealer_total:
+                message_to_speak = f"Dealer total is now {self.dealer_total}."
+                self.last_dealer_total = self.dealer_total
+            
+            if self.dealer_total >= 17:
+                if self.dealer_total > 21:
+                    dealer_end_message = f"Dealer busts with {self.dealer_total}."
+                else:
+                    dealer_end_message = f"Dealer stands with {self.dealer_total}."
+                
+                self.tts.speak(dealer_end_message)
+                time.sleep(1) 
+                
+                result_message = self.determine_winner(self.player_total, self.dealer_total)
+                self.tts.speak(result_message)
+                time.sleep(1)
+                
+                message_to_speak = "Game over. Say 'new game' to play again, or 'i quit' to exit." # <-- MODIFIED
+                self.game_phase = "GAME_OVER"
         
-        return description
+        # --- STATE: GAME_OVER ---
+        elif self.game_phase == "GAME_OVER":
+            pass
+                
+        return message_to_speak
+
+    def run(self):
+        """The main application loop."""
+        
+        self.reset_game() 
+        self.tts.speak("Welcome to Accessible Blackjack. "
+                       "Press 'q' on the keyboard to quit at any time. "
+                       "Please clear all cards from the table to begin.")
+        
+        while self.running:
+            # 1. Get Data from Ash's Module
+            card_data, frame_to_show = self.detector.get_detected_cards()
+            
+            if frame_to_show is None:
+                print("Error: No frame from camera. Exiting.")
+                break
+            
+            # 2. Get Input from Bhrett's Module (non-blocking)
+            voice_command = self.tts.get_command()
+            
+            # 3. Check for keyboard 'q' to quit
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
+                self.running = False
+                break
+            
+            # --- 4. STABILITY LOGIC ---
+            current_player_hand_tuple = tuple(sorted([c['id'] for c in card_data if c['owner'] == 'Player']))
+            current_dealer_hand_tuple = tuple(sorted([c['id'] for c in card_data if c['owner'] == 'Dealer']))
+            
+            game_message = None
+            
+            has_vision_changed = (current_player_hand_tuple != self.last_seen_player_hand) or \
+                                 (current_dealer_hand_tuple != self.last_seen_dealer_hand)
+            
+            if has_vision_changed:
+                self.current_stability_count = 0
+                self.last_seen_player_hand = current_player_hand_tuple
+                self.last_seen_dealer_hand = current_dealer_hand_tuple
+            else:
+                self.current_stability_count += 1
+
+            # --- 5. RUN GAME LOGIC (EVENT-DRIVEN) ---
+            
+            is_now_stable = self.current_stability_count == self.REQUIRED_STABILITY
+
+            if voice_command:
+                print(f"[Game Update] Voice Command: '{voice_command}'")
+                game_message = self.update_game_state(voice_command)
+            
+            elif is_now_stable:
+                self.player_hand = list(self.last_seen_player_hand)
+                self.dealer_hand = list(self.last_seen_dealer_hand)
+                
+                print(f"[Game Update] Stable State: Phase: {self.game_phase} | "
+                      f"Player: {len(self.player_hand)} ({self.calculate_hand_value(self.player_hand)}) | "
+                      f"Dealer: {len(self.dealer_hand)} ({self.calculate_hand_value(self.dealer_hand)})")
+                
+                game_message = self.update_game_state(None) # Vision trigger
+            
+            # 6. Send to Bhrett's Module
+            if game_message:
+                self.tts.speak(game_message)
+
+            # 7. Show the visual feed
+            cv2.imshow("Accessible Blackjack - Game State", frame_to_show)
+            
+            time.sleep(0.01)
+
+    def cleanup(self):
+        """Cleans up resources."""
+        print("\n[GameState] Cleaning up and shutting down...")
+        self.detector.cleanup()
+        self.tts.stop() # Tell the audio threads to stop
+        cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    game = BlackjackGame()
+    try:
+        game.run()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        game.cleanup()
