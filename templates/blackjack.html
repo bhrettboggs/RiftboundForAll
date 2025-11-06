@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible Blackjack</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #ffd700;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .game-table {
+            flex: 2;
+            background: linear-gradient(135deg, #0f5132 0%, #1a7f5a 100%);
+            border-radius: 200px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 8px solid #8b4513;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dealer-area, .player-area {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .dealer-area {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-area {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .area-label {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffd700;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .dealer-area .area-label {
+            color: #ff6b6b;
+        }
+
+        .cards-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            min-height: 120px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            width: 80px;
+            height: 112px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            animation: dealCard 0.3s ease-out;
+            position: relative;
+            color: #000;
+        }
+
+        @keyframes dealCard {
+            from {
+                transform: translateY(-50px) rotateY(180deg);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) rotateY(0);
+                opacity: 1;
+            }
+        }
+
+        .card.hearts, .card.diamonds {
+            color: #ff0000;
+        }
+
+        .card.clubs, .card.spades {
+            color: #000;
+        }
+
+        .card-suit {
+            position: absolute;
+            bottom: 5px;
+            right: 8px;
+            font-size: 0.6em;
+        }
+
+        .total-display {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .dealer-area .total-display {
+            color: #ff6b6b;
+        }
+
+        .player-area .total-display {
+            color: #4ecdc4;
+        }
+
+        .side-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .camera-feed {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .camera-feed h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .camera-feed img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-info h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+        }
+
+        .status-message {
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid #ffd700;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        .game-phase {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #ffd700;
+            color: #000;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .controls {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .btn-hit {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .btn-hit:hover {
+            background: #45b8b0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-stand {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-stand:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-new-game {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .btn-new-game:hover {
+            background: #ffed4e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .voice-command-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .voice-command-input input {
+            flex: 1;
+            padding: 12px;
+            font-size: 1em;
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .voice-command-input input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-send {
+            background: #ffd700;
+            color: #000;
+            padding: 12px 24px;
+        }
+
+        .stability-indicator {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .stability-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .stability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #ffd700);
+            transition: width 0.3s ease;
+        }
+
+        .help-text {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .connected {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        .disconnected {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">Connecting...</div>
+
+    <div class="header">
+        <h1>🎰 Accessible Blackjack 🎰</h1>
+    </div>
+
+    <div class="main-container">
+        <!-- Main Game Table -->
+        <div class="game-table">
+            <!-- Dealer Area -->
+            <div class="dealer-area">
+                <div class="area-label">🎩 DEALER</div>
+                <div class="cards-display" id="dealerCards">
+                    <!-- Cards will be dynamically added here -->
+                </div>
+                <div class="total-display" id="dealerTotal">Total: 0</div>
+            </div>
+
+            <!-- Player Area -->
+            <div class="player-area">
+                <div class="area-label">🎮 YOU</div>
+                <div class="cards-display" id="playerCards">
+                    <!-- Cards will be dynamically added here -->
+                </div>
+                <div class="total-display" id="playerTotal">Total: 0</div>
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+            <!-- Camera Feed -->
+            <div class="camera-feed">
+                <h3>📹 Live Camera Feed</h3>
+                <img id="cameraFeed" src="/video_feed" alt="Camera Feed">
+            </div>
+
+            <!-- Game Information -->
+            <div class="game-info">
+                <h3>📊 Game Status</h3>
+                <div class="game-phase" id="gamePhase">WAITING</div>
+                <div class="status-message" id="statusMessage">
+                    Welcome! Please clear all cards from the table to begin.
+                </div>
+                <div class="stability-indicator">
+                    <div>Detection Stability: <span id="stabilityCount">0</span>/30</div>
+                    <div class="stability-bar">
+                        <div class="stability-fill" id="stabilityFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <h3>🎮 Controls</h3>
+                <div class="button-group">
+                    <button class="btn-hit" onclick="sendCommand('hit')">HIT</button>
+                    <button class="btn-stand" onclick="sendCommand('stand')">STAND</button>
+                </div>
+                <div class="button-group">
+                    <button class="btn-new-game" onclick="sendCommand('new game')">NEW GAME</button>
+                </div>
+                
+                <div class="voice-command-input">
+                    <input type="text" id="commandInput" placeholder="Or type a voice command..." 
+                           onkeypress="handleKeyPress(event)">
+                    <button class="btn-send" onclick="sendCustomCommand()">SEND</button>
+                </div>
+
+                <div class="help-text">
+                    <strong>Voice Commands:</strong><br>
+                    • "hit" or "hit me" - Take another card<br>
+                    • "stand" or "stay" - End your turn<br>
+                    • "new game" - Start a new game<br>
+                    • "quit" - Exit the game
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let isConnected = false;
+
+        // Connection handlers
+        socket.on('connect', () => {
+            console.log('Connected to server');
+            isConnected = true;
+            updateConnectionStatus(true);
+            socket.emit('start_game');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+            isConnected = false;
+            updateConnectionStatus(false);
+        });
+
+        // Game state updates
+        socket.on('game_update', (data) => {
+            console.log('Game update:', data);
+            updateGameDisplay(data);
+        });
+
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (connected) {
+                statusEl.textContent = '🟢 Connected';
+                statusEl.className = 'connection-status connected';
+            } else {
+                statusEl.textContent = '🔴 Disconnected';
+                statusEl.className = 'connection-status disconnected';
+            }
+        }
+
+        function updateGameDisplay(data) {
+            // Update dealer cards
+            const dealerCardsEl = document.getElementById('dealerCards');
+            dealerCardsEl.innerHTML = '';
+            data.dealer_hand.forEach(cardId => {
+                dealerCardsEl.appendChild(createCardElement(cardId));
+            });
+
+            // Update player cards
+            const playerCardsEl = document.getElementById('playerCards');
+            playerCardsEl.innerHTML = '';
+            data.player_hand.forEach(cardId => {
+                playerCardsEl.appendChild(createCardElement(cardId));
+            });
+
+            // Update totals
+            document.getElementById('dealerTotal').textContent = `Total: ${data.dealer_total}`;
+            document.getElementById('playerTotal').textContent = `Total: ${data.player_total}`;
+
+            // Update game phase
+            document.getElementById('gamePhase').textContent = formatGamePhase(data.game_phase);
+
+            // Update message
+            if (data.message) {
+                document.getElementById('statusMessage').textContent = data.message;
+            }
+
+            // Update stability
+            const stability = data.stability || 0;
+            document.getElementById('stabilityCount').textContent = stability;
+            const stabilityPercent = (stability / 30) * 100;
+            document.getElementById('stabilityFill').style.width = stabilityPercent + '%';
+        }
+
+        function createCardElement(cardId) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // Parse card (e.g., "KS" = King of Spades)
+            const rank = cardId.slice(0, -1);
+            const suit = cardId.slice(-1);
+            
+            // Determine suit symbol and color
+            let suitSymbol = '';
+            let suitClass = '';
+            switch(suit) {
+                case 'H':
+                    suitSymbol = '♥';
+                    suitClass = 'hearts';
+                    break;
+                case 'D':
+                    suitSymbol = '♦';
+                    suitClass = 'diamonds';
+                    break;
+                case 'C':
+                    suitSymbol = '♣';
+                    suitClass = 'clubs';
+                    break;
+                case 'S':
+                    suitSymbol = '♠';
+                    suitClass = 'spades';
+                    break;
+            }
+            
+            card.classList.add(suitClass);
+            card.innerHTML = `
+                ${rank}
+                <span class="card-suit">${suitSymbol}</span>
+            `;
+            
+            return card;
+        }
+
+        function formatGamePhase(phase) {
+            const phases = {
+                'WAITING_FOR_CLEAR': 'WAITING',
+                'STARTING': 'DEALING',
+                'PLAYER_TURN': 'YOUR TURN',
+                'DEALER_TURN': 'DEALER TURN',
+                'GAME_OVER': 'GAME OVER'
+            };
+            return phases[phase] || phase;
+        }
+
+        function sendCommand(command) {
+            console.log('Sending command:', command);
+            socket.emit('voice_command', { command: command });
+        }
+
+        function sendCustomCommand() {
+            const input = document.getElementById('commandInput');
+            const command = input.value.trim();
+            if (command) {
+                sendCommand(command);
+                input.value = '';
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendCustomCommand();
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            // Don't trigger if typing in input
+            if (event.target.tagName === 'INPUT') return;
+            
+            switch(event.key.toLowerCase()) {
+                case 'h':
+                    sendCommand('hit');
+                    break;
+                case 's':
+                    sendCommand('stand');
+                    break;
+                case 'n':
+                    sendCommand('new game');
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
