@@ -61,7 +61,7 @@ class CardDetector:
         if self.frame_counter % self.process_every_n_frames == 0:
             try:
                 # Using the confidence/overlap from your file
-                results = self.model.predict(frame, confidence=40, overlap=30).json()
+                results = self.model.predict(frame, confidence=40, overlap=45).json()
                 self.latest_results = results
             except Exception as e:
                 print(f"Error during prediction: {e}")

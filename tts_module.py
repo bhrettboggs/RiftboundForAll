@@ -1,6 +1,5 @@
-# tts_module.py - IMPROVED VERSION
+# tts_module.py - CLEANED VERSION (TTS ONLY)
 
-import speech_recognition as sr
 import threading
 import queue
 import time
@@ -9,8 +8,10 @@ import os
 
 class AudioManager:
     """
-    Handles all Text-to-Speech (TTS) and Speech-to-Text (STT)
-    functionality in non-blocking background threads.
+    Handles all Text-to-Speech (TTS) functionality
+    in a non-blocking background thread.
+    
+    (STT functionality has been removed.)
     """
 
     def __init__(self):
@@ -25,43 +26,15 @@ class AudioManager:
         self.speaker_thread = threading.Thread(target=self._speak_loop, daemon=True)
 
         # --- STT (Listener) Setup ---
-        self.command_queue = queue.Queue()
-        self.recognizer = sr.Recognizer()
+        # (All STT code has been removed)
         
-        # IMPROVED: Better recognition settings
-        self.recognizer.energy_threshold = 4000
-        self.recognizer.dynamic_energy_threshold = False
-        self.recognizer.pause_threshold = 0.8  # How long to wait for pause
-        
-        try:
-            self.microphone = sr.Microphone()
-            self.listener_thread = threading.Thread(target=self._listen_loop, daemon=True)
-            self.calibrate_mic()
-        except Exception as e:
-            print(f"[STT] Warning: Microphone initialization failed: {e}")
-            self.microphone = None
-            self.listener_thread = None
-        
-        # Start threads
+        # Start speaker thread
         self.speaker_thread.start()
-        if self.listener_thread:
-            self.listener_thread.start()
         
         print("[AudioManager] Ready.")
 
-    def calibrate_mic(self):
-        """Calibrate microphone for ambient noise."""
-        if not self.microphone:
-            return
-            
-        try:
-            with self.microphone as source:
-                print("[STT] Calibrating microphone (stay quiet for 2 seconds)...")
-                self.recognizer.adjust_for_ambient_noise(source, duration=2)
-                print(f"[STT] Microphone calibrated. Energy threshold: {self.recognizer.energy_threshold}")
-        except Exception as e:
-            print(f"[STT] Mic calibration error: {e}")
-
+    # --- CALIBRATE_MIC REMOVED ---
+    
     def _speak_loop(self):
         """
         Background thread for TTS.
@@ -108,59 +81,7 @@ class AudioManager:
             except Exception as e:
                 print(f"[TTS] Speak loop error: {e}")
 
-    def _listen_loop(self):
-        """Background thread for speech recognition."""
-        if not self.microphone:
-            print("[STT] No microphone available, listening disabled")
-            return
-            
-        consecutive_errors = 0
-        max_consecutive_errors = 5
-        
-        while self.running:
-            try:
-                with self.microphone as source:
-                    # Listen with timeout
-                    audio = self.recognizer.listen(source, timeout=3, phrase_time_limit=5)
-                
-                # Recognize speech
-                command = self.recognizer.recognize_google(audio).lower().strip()
-                print(f"[STT] Heard: '{command}'")
-                
-                # Put in queue
-                self.command_queue.put(command)
-                
-                # Reset error counter on success
-                consecutive_errors = 0
-
-            except sr.WaitTimeoutError:
-                # Normal timeout - not an error
-                consecutive_errors = 0
-                pass
-                
-            except sr.UnknownValueError:
-                # Couldn't understand - not critical
-                consecutive_errors = 0
-                pass
-                
-            except sr.RequestError as e:
-                # API error - more serious
-                consecutive_errors += 1
-                print(f"[STT] Google API Error: {e}")
-                if consecutive_errors >= max_consecutive_errors:
-                    print("[STT] Too many API errors, pausing recognition...")
-                    time.sleep(10)
-                    consecutive_errors = 0
-                    
-            except Exception as e:
-                consecutive_errors += 1
-                print(f"[STT] Listener Error: {e}")
-                if consecutive_errors >= max_consecutive_errors:
-                    print("[STT] Too many errors, restarting listener...")
-                    time.sleep(5)
-                    consecutive_errors = 0
-            
-            time.sleep(0.1)
+    # --- _LISTEN_LOOP REMOVED ---
 
     # --- Public Methods ---
 
@@ -190,24 +111,8 @@ class AudioManager:
         # Add this message
         self.speak_queue.put(text.strip())
 
-    def get_command(self) -> str:
-        """
-        Get the next voice command (non-blocking).
-        Returns None if no command available.
-        """
-        try:
-            command = self.command_queue.get_nowait()
-            return command
-        except queue.Empty:
-            return None
-
-    def clear_commands(self):
-        """Clear all pending voice commands."""
-        while not self.command_queue.empty():
-            try:
-                self.command_queue.get_nowait()
-            except queue.Empty:
-                break
+    # --- GET_COMMAND REMOVED ---
+    # --- CLEAR_COMMANDS REMOVED ---
 
     def is_speaking(self) -> bool:
         """Check if currently speaking."""
@@ -244,30 +149,22 @@ class AudioManager:
         # Wait for threads
         if self.speaker_thread.is_alive():
             self.speaker_thread.join(timeout=2)
-        if self.listener_thread and self.listener_thread.is_alive():
-            self.listener_thread.join(timeout=2)
+        
+        # --- LISTENER_THREAD JOIN REMOVED ---
         
         print("[AudioManager] Stopped.")
 
 
-# Test function
+# Test function (optional, can be removed)
 if __name__ == "__main__":
-    print("Testing AudioManager...")
+    print("Testing AudioManager (TTS Only)...")
     audio = AudioManager()
     
-    audio.speak("Testing text to speech. This is a test message.")
-    time.sleep(3)
+    audio.speak("Testing text to speech.")
+    audio.speak("This is a second test message.")
     
-    audio.speak("Say something now...")
-    time.sleep(5)
+    print("Waiting for speech to finish...")
+    audio.wait_for_speech()
     
-    cmd = audio.get_command()
-    if cmd:
-        print(f"You said: {cmd}")
-        audio.speak(f"I heard you say: {cmd}")
-    else:
-        audio.speak("I didn't hear anything")
-    
-    time.sleep(3)
     audio.stop()
     print("Test complete!")
