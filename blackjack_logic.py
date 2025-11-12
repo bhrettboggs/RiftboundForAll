@@ -2,6 +2,23 @@ import cv2
 import time
 import random
 from typing import List, Dict, Optional, Tuple
+#evan testing
+from firebase import firebase
+
+firebaseConfig = {
+  'apiKey': "AIzaSyDuUkLD09Xwhon__e-0RoYI0K_-5QBDvyg",
+  'authDomain': "blackjack-49d5a.firebaseapp.com",
+  'databaseURL': "https://blackjack-49d5a-default-rtdb.firebaseio.com",
+  'projectId': "blackjack-49d5a",
+  'storageBucket': "blackjack-49d5a.firebasestorage.app",
+  'messagingSenderId': "27773902305",
+  'appId': "1:27773902305:web:d5c161bbfcdba6e13c46a0",
+  'measurementId': "G-7QTF96C5CT"
+};
+
+firebase_app = firebase.FirebaseApplication(firebaseConfig['databaseURL'], None)
+
+#evans testing
 
 # Import the other team members' modules
 from card_detection import CardDetector  # Ash's Module
@@ -91,12 +108,19 @@ class BlackjackGame:
         return total
 
     def determine_winner(self, player_total: int, dealer_total: int) -> str:
+        #evan testing
+        wincount = 0
+        #evan testing
         """Compares final totals and returns a result message."""
         if player_total > 21:
             return f"You busted with {player_total}. You lose."
         if dealer_total > 21:
+            wincount += 1
+            firebase_app.put('game', 'User', 'test', wincount)
             return f"Dealer busted with {dealer_total}. You win!"
         if player_total > dealer_total:
+            wincount += 1
+            firebase_app.put('game', 'User', 'test', wincount)
             return f"You win with {player_total} to {dealer_total}!"
         if dealer_total > player_total:
             return f"Dealer wins with {dealer_total} to {player_total}."
