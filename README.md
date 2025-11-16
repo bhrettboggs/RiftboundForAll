@@ -23,7 +23,7 @@ The game logic infers the player's intent based *only* on what it sees with the 
 3.  **To "Play Again"**: The dealer clears all cards from the table.
     * **Result:** The game sees the empty table and automatically starts a new round, saying, "Table is clear. Please place 2 cards for yourself and 1 for the dealer."
 
-## 💻 Technology Used
+## Technology Used
 
 * **Python 3**
 * **OpenCV:** For capturing the webcam feed.
