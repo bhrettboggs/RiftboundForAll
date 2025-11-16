@@ -1,3 +1,68 @@
+# Accessible Blackjack
+
+This project is a Python application that makes the physical card game of Blackjack accessible to visually impaired users. It uses computer vision and text-to-speech (TTS) to act as a "sighted" assistant, audibly narrating the entire game as it's played on a real table.
+
+
+
+## Core Features
+
+* **Real-Time Card Recognition:** Uses a Roboflow-trained computer vision model to identify card ranks, suits, and their location on the table.
+* **Text-to-Speech Feedback:** Announces all game events, totals, and results, providing a complete audio-based experience (e.g., "Cards dealt. You have 17," "Dealer busts with 24," "You win!").
+* **100% Vision-Driven Logic:** This is the key innovation. The game requires **no keyboard, mouse, or voice commands.** The entire game flow is controlled by the dealer's physical actions.
+
+## How it Works: The Vision-Driven Controls
+
+The game logic infers the player's intent based *only* on what it sees with the camera.
+
+1.  **To "Hit"**: The dealer places a new card in the **player's** zone.
+    * **Result:** The game sees the new card, recalculates the player's total, and announces it (e.g., "Your total is now 19.").
+
+2.  **To "Stand"**: The dealer places a new card in the **dealer's** zone.
+    * **Result:** The game sees this as the signal to end the player's turn and begin the dealer's turn. It announces, "You stand with 19. Dealer's turn."
+
+3.  **To "Play Again"**: The dealer clears all cards from the table.
+    * **Result:** The game sees the empty table and automatically starts a new round, saying, "Table is clear. Please place 2 cards for yourself and 1 for the dealer."
+
+## 💻 Technology Used
+
+* **Python 3**
+* **OpenCV:** For capturing the webcam feed.
+* **Roboflow:** For the trained computer vision model.
+* **macOS `say` command:** Used via `subprocess` for reliable, low-latency text-to-speech.
+* **Pytest:** For unit testing the game logic.
+
+## Setup and Installation
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone [https://github.com/your-username/your-repository-name.git](https://github.com/your-username/your-repository-name.git)
+    cd your-repository-name
+    ```
+
+2.  **Create a Virtual Environment:**
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    ```
+
+3.  **Install Dependencies:**
+    (You must have a `requirements.txt` file for this to work)
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Run the Game:**
+    ```bash
+    python blackjack_logic.py
+    ```
+
+## Project Structure
+
+* **`blackjack_logic.py`**: The main application file. Runs the game loop and contains all the state machine logic.
+* **`card_detection.py`**: Manages the webcam feed, loads the Roboflow model, and handles all card detection and spatial zone logic.
+* **`tts_module.py`**: Manages the text-to-speech audio queue and speaking threads.
+* **`test_blackjack_logic.py`**: Unit tests for the game logic, built with `pytest`.
+
 # CNN Card Recognition Model
 
 This module is the core of the card recognition system. It uses a Convolutional Neural Network (CNN) to identify playing cards from a processed image. The model is specifically trained to recognize cards from 150x150 pixel grayscale images.
