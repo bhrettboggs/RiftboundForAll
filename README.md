@@ -23,6 +23,16 @@ The game logic infers the player's intent based *only* on what it sees with the 
 3.  **To "Play Again"**: The dealer clears all cards from the table.
     * **Result:** The game sees the empty table and automatically starts a new round, saying, "Table is clear. Please place 2 cards for yourself and 1 for the dealer."
 
+## My Contributions (Bhrett Boggs)
+
+This was a three-person team project. My parts:
+
+* **Player profiles** (`player_profile_system.py`, `profile_integration.py`): Standard, Beginner and Expert profile types with persistent statistics and accessibility settings.
+* **Achievements and betting** (`achievement_system.py`, `betting_system.py`): win-streak and total-win achievements, chip management and bet resolution.
+* **Web version** (`web_app.py`, `templates/blackjack.html`, `start_web_game.py`): a Flask/Socket.IO front end for the game.
+* **Detection and game logic:** the improved card-detection algorithm (`improved_card_dectection.py`), updates to `accessible_blackjack.py`, and voice-command and game-state changes in `blackjack_logic.py` and `tts_module.py`.
+* **Tests** (`test_blackjack_features.py`): 27 pytest tests covering profiles, achievements, betting, and how they work together. Run them with `pytest test_blackjack_features.py`.
+
 ## Technology Used
 
 * **Python 3**
