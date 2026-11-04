@@ -35,8 +35,8 @@ The game logic infers the player's intent based *only* on what it sees with the 
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/your-username/your-repository-name.git](https://github.com/your-username/your-repository-name.git)
-    cd your-repository-name
+    git clone https://github.com/bhrettboggs/RiftboundForAll.git
+    cd RiftboundForAll
     ```
 
 2.  **Create a Virtual Environment:**
@@ -46,12 +46,19 @@ The game logic infers the player's intent based *only* on what it sees with the 
     ```
 
 3.  **Install Dependencies:**
-    (You must have a `requirements.txt` file for this to work)
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **Run the Game:**
+4.  **Set Your API Key:**
+    The Roboflow key is read from an environment variable and is never committed.
+    ```bash
+    export ROBOFLOW_API_KEY="your-key-here"
+    # Optional: log win counts to Firebase Realtime Database
+    export FIREBASE_DATABASE_URL="https://<your-project>.firebaseio.com"
+    ```
+
+5.  **Run the Game:**
     ```bash
     python blackjack_logic.py
     ```
@@ -61,7 +68,7 @@ The game logic infers the player's intent based *only* on what it sees with the 
 * **`blackjack_logic.py`**: The main application file. Runs the game loop and contains all the state machine logic.
 * **`card_detection.py`**: Manages the webcam feed, loads the Roboflow model, and handles all card detection and spatial zone logic.
 * **`tts_module.py`**: Manages the text-to-speech audio queue and speaking threads.
-* **`test_blackjack_logic.py`**: Unit tests for the game logic, built with `pytest`.
+* **`test_components.py`**, **`test_profile_system.py`**: Tests for the game components and player profiles.
 
 # CNN Card Recognition Model
 

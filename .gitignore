@@ -19,7 +19,8 @@ __pycache__/
 # --- Log and Output Files ---
 *.log
 *.txt
-!requirements.txt # The '!' excludes requirements.txt from being ignored
+# Keep requirements.txt tracked (comments must be on their own line)
+!requirements.txt
 
 # --- Machine Learning Model Files (Use Git LFS for these if needed) ---
 *.h5

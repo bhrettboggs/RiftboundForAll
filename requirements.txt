@@ -1,0 +1,11 @@
+opencv-python
+numpy
+roboflow
+tensorflow
+pyttsx3
+SpeechRecognition
+pyaudio
+flask
+flask-socketio
+python-firebase
+pytest

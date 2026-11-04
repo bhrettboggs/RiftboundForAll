@@ -1,3 +1,4 @@
+import os
 import cv2
 from roboflow import Roboflow
 import time
@@ -9,8 +10,8 @@ class CardDetector:
         """
         try:
             # --- 1. AUTHENTICATION & MODEL LOAD ---
-            # Using the API key you provided
-            api_key = "DiIME5kv2PXA6GJQWMI1" 
+            # Read the key from the environment; never commit it
+            api_key = os.environ["ROBOFLOW_API_KEY"]
             rf = Roboflow(api_key=api_key)
             
             project = rf.workspace("augmented-startups").project("playing-cards-ow27d")

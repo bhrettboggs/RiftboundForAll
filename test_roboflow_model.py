@@ -1,10 +1,11 @@
+import os
 import cv2
 from roboflow import Roboflow
 import time # Import time for FPS calculation (optional but good)
 
 # --- 1. AUTHENTICATION ---
-# Paste your NEW private API key here.
-rf = Roboflow(api_key="E4GmFyFX8INFwjF1BOvw")
+# Set ROBOFLOW_API_KEY in your environment; never commit the key.
+rf = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"])
 
 # --- 2. LOAD THE PROJECT AND GET CLASS NAMES ---
 workspace_id = "augmented-startups"

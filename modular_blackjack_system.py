@@ -120,13 +120,10 @@ class AccessibleBlackjackSystem:
 
         # --- Roboflow Setup ---
         try:
-            # --- IMPORTANT: PASTE YOUR NEWEST VALID API KEY HERE ---
-            api_key = "DiIME5kv2PXA6GJQWMI1"
-            # --- END IMPORTANT ---
-
-            print(f"DEBUG: Using api_key variable: '{api_key}'")
-            if not api_key or "YOUR" in api_key:
-                 raise ValueError("API Key not set correctly in the script. Please replace the placeholder.")
+            # Read the key from the environment; never commit it
+            api_key = os.environ.get("ROBOFLOW_API_KEY")
+            if not api_key:
+                 raise ValueError("ROBOFLOW_API_KEY is not set. Export it before running.")
 
             print("Attempting to authenticate with Roboflow...")
             rf = Roboflow(api_key=api_key)
